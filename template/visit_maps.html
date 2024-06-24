@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>K2 Korea Maps</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/visit_maps.css" />
+    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=is1azcoxsf"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-touch-events/2.0.0/jquery.mobile-events.min.js"> </script>
+</head>
+<body>
+    <div id="wrap">
+        <header>
+            <h1>K2 Korea Maps</h1>
+        </header>
+
+        <div class="side_wrap">
+            <div class="side_header">
+                <h2>매장 방문 리스트</h2>
+
+                <div class="filter_wrap">
+                    <button type="button" class="filter_btn">필터</button>
+
+                    <div class="filter_box" id="filter_tab">
+                        <div class="filter_box_inner">
+                            <div class="filter_con">
+                                <p>날짜</p>
+                                <div class="filter_date_s" ><p>시작일</p><input type="date" id="st_date" onchange=dateChange("st")></div>
+                                <div class="filter_date_e" ><p>종료일</p><input type="date" id="et_date" onchange=dateChange("et")></div>
+                                <div id='date_message' style="color:red; font-size: 12px; margin-top: 2px"></div>
+                            </div>
+
+                            <div class="filter_con">
+                                <p>외근 유형</p>
+                                <div class="work_type">
+                                    <div class="type">
+                                        <input id="worktype_01" type="checkbox" name="VisitType_select" class="radio"
+                                               value="외근">
+                                        <label for="worktype_01">외근</label>
+                                    </div>
+                                    <div class="type">
+                                        <input id="worktype_02" type="checkbox" name="VisitType_select" class="radio"
+                                               value="출장">
+                                        <label for="worktype_02">출장</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="filter_con">
+                                <p>교통 유형</p>
+                                <div class="traffic_type">
+                                    <div class="type">
+                                        <input id="vehicle_01" type="checkbox" name="Vehicle_select" class="radio"
+                                               value="법인차">
+                                        <label for="vehicle_01">법인차</label>
+                                    </div>
+                                    <div class="type">
+                                        <input id="vehicle_02" type="checkbox" name="Vehicle_select" class="radio"
+                                               value="개인차">
+                                        <label for="vehicle_02">개인차</label>
+                                    </div>
+{#                                    <div class="type">#}
+{#                                        <input id="vehicle_03" type="checkbox" name="Vehicle_select" class="radio"#}
+{#                                               value="대중교통">#}
+{#                                        <label for="vehicle_03">대중교통</label>#}
+{#                                    </div>#}
+                                    <div class="type">
+                                        <input id="vehicle_03" type="checkbox" name="Vehicle_select" class="radio"
+                                               value="버스/지하철">
+                                        <label for="vehicle_03">버스/지하철</label>
+                                    </div>
+                                    <div class="type">
+                                        <input id="vehicle_04" type="checkbox" name="Vehicle_select" class="radio"
+                                               value="택시">
+                                        <label for="vehicle_04">택시</label>
+                                    </div>
+                                    <div class="type">
+                                        <input id="vehicle_05" type="checkbox" name="Vehicle_select" class="radio"
+                                               value="고속버스/기차">
+                                        <label for="vehicle_05">고속버스/기차</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: row; gap: 5px;">
+                                <button style ="background-color:gray" type="button" class="choose-btn" onclick =filterClearfunction()>초기화</button>
+                                <button type="button" class="choose-btn" onclick =filterfunction()>적용</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side_contents">
+                <div class="sidecon_bar"></div>
+                <div class="sideCon_inner">
+                    <p class="sideCon_none" id="none_visit_alert">예정된 방문 계획이 없습니다.</p>
+
+                    {% for visitplan in visitplanlist %}
+                        {% for visit in visitplan %}
+                            {% if forloop.counter == 1 %}
+                                <div id='{{ visit.sfid }}' class="side_conBox" onclick=visiplanclick_event('{{ visit.sfid }}')>
+                                <div class="side_con_top">
+                                    <div class="conBox">
+                                        <p class="con_name"><span>방문 코드</span></p>
+                                        <p class="con_text route"><a onclick=postmessage('{{ visit.url }}')>{{ visit.name }}</a></p>
+                                    </div>
+
+                                    <div class="conBox">
+                                        <p class="con_name"><span>담당자</span></p>
+                                        <p class="con_text">{{ visit.hremp }}</p>
+                                    </div>
+
+                                    <div class="conBox tpath" style="visibility: hidden">
+                                        <p class="con_name"><img src="/static/img/map_picker.svg" alt=""/><span>총거리</span></p>
+                                        <p class="con_text"></p>
+                                    </div>
+                                </div>
+                                <div class="side_con_detail">
+                                <ul class="con_row_tit">
+                                    <li>방문 목적</li>
+                                    <li>방문 장소</li>
+                                    <li>주소</li>
+                                </ul>
+
+                            {% endif %}
+                            <ul class="con_row_main" draggable="true">
+                                <li>{{ visit.visitobjective }}</li>
+                                <li>{{ visit.place_name }}</li>
+                                <li>{{ visit.address }}</li>
+                            </ul>
+
+                        {% endfor %}
+                    </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {# s: map_wrap #}
+        <div id="map_wrap">
+            <div id="map" style="width:100%;height:100%;"></div>
+        </div>
+        {# e: map_wrap #}
+    </div>
+<script>
+    var Clicked_visit
+    var mapOptions = {
+        center: new naver.maps.LatLng(37.3595704, 127.105399),
+        zoom: 10,
+        minZoom: 7, //지도의 최소 줌 레벨
+        zoomControl: true, //줌 컨트롤의 표시 여부
+        zoomControlOptions: { //줌 컨트롤의 옵션
+            position: naver.maps.Position.RIGHT_CENTER
+        }
+    };
+    var map = new naver.maps.Map('map', mapOptions);
+    var markerlist = [];
+    var infolist = [];
+    var polylinePath = [];
+    $(document).ready(function(){
+        setupdefault()
+        let visitplanId = $('#'+'{{ visitplanId | safe }}')
+        if(visitplanId.length){
+            visitplanId.click()
+        }
+    });
+    function visiplanclick_event(sfid){
+        close_allinfo()
+        let marker_str = '['
+        let infolist = []
+
+        throw_fetch('/api/getvisit_info/?'+new URLSearchParams({
+            sfid: sfid,
+        })).then(function(data) {
+            markerlist.forEach((element) => {element.setMap(null)})
+            markerlist = []
+            let marker_element = data.data
+
+            for(let i = 0; i<marker_element.length; i++){
+                 marker =  new naver.maps.Marker({
+                    position: new naver.maps.LatLng(marker_element[i].place_latitude, marker_element[i].place_longitude),
+                    map: map,
+                 })
+                let tempcontent = '<div class="store-info"><a href='+marker_element[i].place_url+'><b>'+marker_element[i].place_name+'</a></b>'
+                if (marker_element[i].this_year_amt){
+                    tempcontent += '<br>연 매출: ' + marker_element[i].this_year_amt
+                    tempcontent += '<br>월 매출: ' + marker_element[i].this_month_amt
+                }
+
+                var infoWindow = new naver.maps.InfoWindow({
+                    content: tempcontent + '</div>'
+
+                });
+                 infolist.push(infoWindow)
+                 marker_str += '{"latitude":"' + marker_element[i].place_latitude + '","longitude":"'+ marker_element[i].place_longitude + '"},'
+
+                 marker.set('seq', i);
+                 markerlist.push(marker);
+            }
+            for(let i = 0; i<markerlist.length; i++){
+                 naver.maps.Event.addListener(markerlist[i], "mouseover", function(e) {
+                    if (infolist[i].getMap()) {
+                        infolist[i].close();
+                    } else {
+                        infolist[i].open(map, markerlist[i]);
+                    }
+                });
+            }
+            let center = data.center
+            let max_distance = data.max_distance
+            let zoom_level = data.zoom_level
+            console.log(max_distance)
+            map.setZoom(zoom_level,true)
+            map.setCenter(new naver.maps.LatLng(center[0], center[1]))
+
+            search_path_2(marker_str.slice(0, -1)+']')
+
+
+        })
+
+
+    }
+    function close_allinfo(){
+        for(let i = 0; i<infolist.length; i++){
+            if (infolist[i].getMap()) {
+                infolist[i].close();
+            }
+        }
+    }
+    function setupdefault(){
+
+        // filter button toggle
+        $(".filter_btn").click(function () {
+            $(".filter_box").stop().fadeToggle(200);
+            return false; //중요
+        });
+
+        $('#wrap').click(function (e) {
+            if (!$('#filter_tab').has(e.target).length) $('#filter_tab').hide();
+        });
+
+
+        // visit map Mobile
+        $(".side_contents").bind('swipeup', handler);
+        function handler(event) {
+            $(this).addClass("swipe_up");
+            $(this).removeClass("swipe_down");
+        }
+
+        $(".side_contents").bind('swipedown', handler2);
+        function handler2(event) {
+            $(this).addClass("swipe_down");
+            $(this).removeClass("swipe_up");
+        }
+
+
+        // visit map list selected
+        $(".side_conBox").click(function(){
+            var isActive = $(this).hasClass("border_on");
+
+            $(".side_conBox").removeClass("border_on");
+            $(".side_con_top").removeClass("background_on");
+            $(".tpath").css({'visibility':'hidden'})
+
+            if (!isActive) {
+                $(this).addClass("border_on");
+                $(this).find(".side_con_top").addClass("background_on");
+                Clicked_visit = $(this).find(".tpath")
+                Clicked_visit.css('visibility','visible')
+                Clicked_visit.find(".con_text").html('경로 탐색 중...')
+            }
+        });
+
+
+        const urlStr = window.location.href;
+        const url = new URL(urlStr);
+        const urlParams = url.searchParams;
+        if(urlParams.get("visitType")){
+            $("input[name='VisitType_select']").each(function () {
+                if(  urlParams.get("visitType").split(',').includes($(this).val())){
+                    $(this).prop('checked',true);
+                }
+            })}
+        if(urlParams.get("vehicle")){
+            $("input[name='Vehicle_select']").each(function () {
+                if( urlParams.get("vehicle").split(',').includes($(this).val())){
+                    $(this).prop('checked',true);
+                }
+            })}
+        if(urlParams.get("stdate")){ $("#st_date").val(urlParams.get("stdate"))}
+        if(urlParams.get("enddate")){ $("#et_date").val(urlParams.get("enddate"))}
+        let visitplanlist = {{ visitplanlist | safe }}
+        if(visitplanlist.length == 0){
+            $("#none_visit_alert").css('display','block')
+        }
+
+    }
+
+    function search_path_2(marker_str) {
+        polylinePath.forEach((element) => {element.setMap(null)})
+        throw_fetch('/api/naver_path/?'+new URLSearchParams({
+            point_list: marker_str,
+        }))
+        .then((data) => log_search_path_result(data))
+        .catch((error) => console.log(error));
+    }
+
+    function log_search_path_result(data) {
+        let res_msg = data['message'];
+        let distance = data['route']['trafast'][0]['summary']['distance'];
+        let duration = data['route']['trafast'][0]['summary']['duration'];
+        let start = data['route']['trafast'][0]['summary']['start']['location'];
+        let goal = data['route']['trafast'][0]['summary']['goal']['location'];
+        let tollFare = data['route']['trafast'][0]['summary']['tollFare'];
+        let fuelPrice = data['route']['trafast'][0]['summary']['fuelPrice'];
+
+        let log_msg = {
+            '메시지': res_msg,
+            '거리': distance,
+            '소요시간': duration,
+            '출발지': start,
+            '도착지': goal,
+            '톨게이트 비용': tollFare,
+            '연료비': fuelPrice
+        }
+        let path = data['route']['trafast'][0]['path']
+        polylinePath.forEach((element) => {element.setMap(null)})
+        let polyline_array = []
+        path.forEach((element) => {
+            polyline_array.push(
+                new naver.maps.LatLng(element[1], element[0])
+            )
+        })
+        var polyline = new naver.maps.Polyline({
+            path: polyline_array,      //선 위치 변수배열
+            strokeColor: '#FF0000', //선 색 빨강 #빨강,초록,파랑
+            strokeOpacity: 0.8, //선 투명도 0 ~ 1
+            strokeWeight: 6,   //선 두께
+            map: map           //오버레이할 지도
+        });
+        polylinePath.push(polyline)
+        Clicked_visit.find(".con_text").html(Math.round(distance/1000)+ 'km')
+    }
+
+
+    async function throw_fetch(request_url, request_option) {
+        const res = await fetch(request_url, request_option);
+        const res_data = await res.json();
+        if (res.ok) {
+            return res_data;
+        } else {
+            throw Error(res_data);
+        }
+    }
+    function filterfunction(){
+
+        let visitType = ''
+        $("input[name='VisitType_select']:checked").each(function(){visitType += $(this).val() + ','})
+        let vehicle = ''
+        $("input[name='Vehicle_select']:checked").each(function(){vehicle += $(this).val() + ','})
+
+        let stdate = $('#st_date').val()
+        let enddate = $('#et_date').val()
+        console.log(vehicle)
+        let base_url = "{% url 'apps:visit_maps'  %}"
+        let post_boolean = false
+        if (vehicle){
+            base_url += '?vehicle=' + vehicle.slice(0,-1)
+            post_boolean = true
+        }
+        if (visitType){
+            if(post_boolean){
+                base_url += '&visitType=' + visitType.slice(0,-1)
+            }
+            else{
+                base_url += '?visitType=' + visitType
+                post_boolean = true
+            }
+        }
+        if (stdate){
+            if(post_boolean){
+                base_url += '&stdate=' + stdate
+            }
+            else{
+                base_url += '?stdate=' + stdate
+                post_boolean = true
+            }
+        }
+        if (enddate){
+            if(post_boolean){
+                base_url += '&enddate=' + enddate
+            }
+            else{
+                base_url += '?enddate=' + enddate
+                post_boolean = true
+            }
+        }
+        console.log(base_url)
+        return window.location.replace(base_url)
+    }
+    function filterClearfunction(){
+
+        $("input[name='VisitType_select']").each(function () {
+            $(this).prop('checked',false);
+        })
+        $("input[name='Vehicle_select']").each(function () {
+            $(this).prop('checked',false);
+        })
+        $("#st_date").val('')
+        $("#et_date").val('')
+    }
+    function dateChange(type) {
+        $('#date_message').html('')
+        if ($('#st_date').val() && $('#et_date').val()) {
+            if ($('#st_date').val() > $('#et_date').val()) {
+                $('#date_message').html('시작일이 종료일 보다 클 수 없습니다.')
+                if (type === 'st') {
+                    $('#st_date').val($('#et_date').val())
+                } else {
+                    $('#et_date').val($('#st_date').val())
+                }
+            }
+
+        }
+    }
+    function postmessage(data){
+            window.parent.postMessage(data, "*");
+    }
+
+
+
+    </script>
+</body>
+</html>

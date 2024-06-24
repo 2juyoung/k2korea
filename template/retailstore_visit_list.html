@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>매장 방문 리스트</title>
+    <link rel="stylesheet" href="/static/css/reset.css" type="text/css" />
+    <link rel="stylesheet" href="/static/css/retailstore_visit_list.css" type="text/css" />
+    <link rel="stylesheet" as="style" crossorigin href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/static/pretendard.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/5000dd40ed.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css" integrity="sha512-10/jx2EXwxxWqCLX/hHth/vu2KY3jCF70dCQB8TSgNjbCVAC/8vai53GfMDrO2Emgwccf2pJqxct9ehpzG+MTw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div id="wrap">
+        <header>
+            <div class="header_inner">
+                <h1>매장 방문 리스트</h1>
+
+                <div class="hd_btn">
+                    <form action="{% url "api:visitRecordPrint" %}"><button type="submit" class="print_btn"><img src="/static/img/save_icon.png" alt="" /><span class="hd_btnText">출력 하기</span></button></form>
+                    <button type="button" class="create_btn" data-toggle="modal" data-target="#myModal"><img src="/static/img/create_icon.svg" alt="" /><span class="hd_btnText">계획 생성</span></button>
+                    <button type="button" class="delete_btn"><img src="/static/img/delete_icon.svg" alt="" /><span class="hd_btnText">제거</span></button>
+                </div>
+            </div>
+        </header>
+
+        {# s: table #}
+        <div class="visit_list">
+            <div class="heading">
+                <div class="row">
+                    <div class="cell">
+                        <p></p>
+                    </div>
+                    <div class="cell">
+                        <p>방문 코드</p>
+                    </div>
+                    <div class="cell">
+                        <p>방문 유형</p>
+                    </div>
+
+                    <div class="cell">
+                        <p>퇴근 유형</p>
+                    </div>
+                    <div class="cell">
+                        <p>교통 수단</p>
+                    </div>
+                    <div class="cell">
+                        <p>부서</p>
+                    </div>
+                    <div class="cell">
+                        <p>담당자</p>
+                    </div>
+                    <div class="cell">
+                        <p>방문 목적</p>
+                    </div>
+                    <div class="cell">
+                        <p>방문 장소(지역명)</p>
+                    </div>
+                    <div class="cell">
+                        <p>방문 예정일</p>
+                    </div>
+                    <div class="cell">
+                        <p>방문일</p>
+                    </div>
+                    <div class="cell">
+                        <p>상태</p>
+                    </div>
+                    <div class="cell">
+                        <p>동행 인원</p>
+                    </div>
+                    <div class="cell">
+                        <p>총 거리</p>
+                    </div>
+                    <div class="cell">
+                        <p>팀장 확인</p>
+                    </div>
+                    <div class="cell">
+                        <p>주소</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table">
+                {% for visit_li in visitplanlist %}
+                    <div class="row_list">
+                        {% for visit in visit_li %}
+                            <div class="row">
+                                {% if forloop.counter == 1 %}
+                                    <div class="cell"><input type="checkbox" name="visitlist_checkbox" value={{ visit.sfid }}></div>
+                                    <div class="cell">
+                                        <p>
+                                            <a onclick=postmessage('{{ visit.url }}')>{{ visit.name }}</a>
+                                            <a onclick=postmessage("https://k2korea.lightning.force.com/lightning/app/standard__Retail/n/Vist_Plan?c__visitplanId={{ visit.sfid }}")>
+                                                <svg class="link-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                                                    <path d="M384 476.1L192 421.2V35.9L384 90.8V476.1zm32-1.2V88.4L543.1 37.5c15.8-6.3 32.9 5.3 32.9 22.3V394.6c0 9.8-6 18.6-15.1 22.3L416 474.8zM15.1 95.1L160 37.2V423.6L32.9 474.5C17.1 480.8 0 469.2 0 452.2V117.4c0-9.8 6-18.6 15.1-22.3z"/>
+                                                </svg>
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div class="cell"><p>{{ visit.visittype_c }}</p></div>
+                                    <div class="cell"><p>{{ visit.offworktype_c }}</p></div>
+                                    <div class="cell"><p>{{ visit.vehicles_c }}</p></div>
+                                    <div class="cell"><p>{{ visit.hremp_team }}</p></div>
+                                    <div class="cell"><p>{{ visit.hremp }}</p></div>
+                                {% else %}
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+
+                                {% endif %}
+                                <div class="cell"><p>{{ visit.visitobjective }}</p></div>
+                                <div class="cell"><p>{{ visit.retailstore_name }}</p></div>
+                                <div class="cell"><p>{{ visit.sttime }}</p></div>
+                                <div class="cell"><p>{{ visit.ettime }}</p></div>
+                                <div class="cell"><p>{{ visit.status }}</p></div>
+                                {% if forloop.counter == 1 %}
+                                    <div class="cell"><p>{{ visit.accompany_team }}</p></div>
+                                    <div class="cell"><p>{{ visit.accompany }}</p></div>
+                                {% else %}
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                    <div class="cell"><p></p></div>
+                                {% endif %}
+                                {% if forloop.counter == 1 %}
+                                    <div class="cell"><p>{{ visit.distance }}</p></div>
+                                    <div class="cell checkbox">
+{#                                        <input type="checkbox" id="check"{{ visit.teamcheck }}>#}
+                                        <div class="toggle">
+                                            <input type="checkbox" id="teamcheck" {{ visit.teamcheck }} onclick="CheckValue_Change(this)" value={{ visit.sfid }} >
+                                            <label for="teamcheck"></label>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                {% endif %}
+                                <div class="cell"><p>{{ visit.address }}</p></div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {# e: table #}
+
+        {# s: modal #}
+        <div class="modal">
+            <div class="modal_body">
+                <h2>매장 방문 계획서</h2>
+
+                <button type="button" class="close_btn">
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div class="modal_first">
+                    <div class="modal_list01">
+                        <h3>상담/시장조사 장소</h3>
+
+                        <div class="retail_list">
+                            <div class="modal_hd visit_type">
+                                <div class="cell"><p></p></div>
+                                <div class="cell"><p>장소명</p></div>
+                                <div class="cell"><p>지역</p></div>
+                            </div>
+
+                            <div class="modal_table md_tb1">
+                                {%  for market in marketlist %}
+                                    <div class="row visit_type">
+                                        <div class="cell"><input type="checkbox" name="selected_market" value='{{ market.sfid }}' value_name='{{market.name}}'></div>
+                                        <div class="cell"><p>{{ market.name }}</p></div>
+                                        <div class="cell"><p>{{ market.address }}</p></div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal_list02">
+                        <div class="modal_list_top">
+                            <h3>담당 매장리스트</h3>
+                            <div class="searchBar">
+                                <input id="SearchRetail" type="search" class="search-input" placeholder="매장명을 입력해주세요." oninput=searchRetailstore()>
+                                <span class="search-icon"></span>
+                            </div>
+                        </div>
+
+                        <div class="retail_list bg-grey">
+                            <div class="modal_hd">
+                                <div class="cell"><p></p></div>
+                                <div class="cell"><p>매장 코드</p></div>
+                                <div class="cell"><p>매장 구분</p></div>
+                                <div class="cell"><p>매장명</p></div>
+                                <div class="cell"><p>지역</p></div>
+                                <div class="cell"><p>이전 방문 일시</p></div>
+                                <div class="cell"><p>방문 횟수<br/>(연누적)</p></div>
+{#                                <div class="cell"><p>미수금<br/>(최근 3개월)</p></div>#}
+                            </div>
+
+                            <div id='retail_list_div' class="modal_table md_tb2">
+                                {% for retail in retail_list %}
+                                    <div class="row_list">
+                                        <div class="row">
+                                            <div class="cell"><input type="checkbox" name="selected_retailstore"
+                                                                     value={{ retail.sfid }} value_name={{ retail.name }}
+                                                                     onchange=addRetailstore(this)></div>
+                                            <div class="cell"><p>{{ retail.shop_cd_c }}</p></div>
+                                            <div class="cell"><p>{{ retail.storediv__name }}</p></div>
+                                            <div class="cell"><p>{{ retail.name }}</p></div>
+                                            <div class="cell"><p>{{ retail.addr_c }}</p></div>
+                                            <div class="cell"><p>{{ retail.lastvisit }}</p></div>
+                                            <div class="cell"><p>{{ retail.visitcount }}</p></div>
+                                            {#                                    <div class="cell"><p>◎</p></div>#}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal_last">
+                    {# s: 방문 유형 선택 #}
+                    <div class="modal_conBox con_first">
+                        <p class="con_tit">1. 방문 유형 선택</p>
+                        <ul class="selected_category">
+                            <li>
+                                <div class="type">
+                                    <input id="visitype_01" type="radio" name="VisitType_select" class="radio" value="외근">
+                                    <label for="visitype_01">외근</label>
+                                </div>
+                                <div class="type">
+                                    <input id="visitype_02" type="radio" name="VisitType_select" class="radio" value="출장">
+                                    <label for="visitype_02">출장</label>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="type_vehicle">
+                                    <div class="type">
+                                        <input id="vehicle_01" type="radio" name="Vehicle_select" class="radio" value="법인차">
+                                        <label for="vehicle_01">법인차</label>
+                                    </div>
+                                    <div class="type">
+                                        <input id="vehicle_02" type="radio" name="Vehicle_select" class="radio" value="개인차">
+                                        <label for="vehicle_02">개인차</label>
+                                    </div>
+                                </div>
+
+                                <div class="type_public">
+                                    <div class="type">
+                                        <input id="vehicle_03" type="radio" name="Vehicle_select" class="radio" value="버스/지하철">
+                                        <label for="vehicle_03">버스/지하철</label>
+                                    </div>
+                                    <div class="type">
+                                        <input id="vehicle_04" type="radio" name="Vehicle_select" class="radio" value="택시">
+                                        <label for="vehicle_04">택시</label>
+                                    </div>
+                                    <div class="type">
+                                        <input id="vehicle_05" type="radio" name="Vehicle_select" class="radio" value="고속버스/기차">
+                                        <label for="vehicle_05">고속버스/기차</label>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="type">
+                                    <input id="business_01" type="radio" name="Business_select" class="radio" value="직접 출발">
+                                    <label for="business_01">직접 출발</label>
+                                </div>
+                                <div class="type">
+                                    <input id="business_02" type="radio" name="Business_select" class="radio" value="본사 출발">
+                                    <label for="business_02">본사 출발</label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    {# e: 방문 유형 선택 #}
+
+                    <div class="modal_conBox">
+                        {# s: 기간, 동행인원 선택 #}
+                        <div class="con_two">
+                            <p class="con_tit">2. 기간 / 동행 인원 선택</p>
+
+                            <div class="selected_date_acc">
+                                <div class="s_date date_type">시작일<input type="date" id="st_date" onchange=dateChange()></div>
+                                <div class="e_date date_type">종료일<input type="date" id="et_date" onchange=dateChange()></div>
+
+                                {# s: 동행 인원 #}
+                                <div class="accompany_people">
+                                    <p class="con_tit">동행 인원</p>
+
+                                    <div class="select_box acc_selectbox">
+                                        <button type="button" class="select_btn select_team">
+                                            <p class="select-name1">팀원 선택</p>
+                                            <span class="arrow-btn1"></span>
+                                        </button>
+                                        <ul class="listbox acc-list">
+                                            {% for accompany in accompany_list %}
+                                                <li class="acc-tab" value={{ accompany.sfid }}><p>{{ accompany.name }}</p><span class="arrow-btn1"></span></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                {# e: 동행 인원 #}
+                            </div>
+                        </div>
+                        {# e: 기간, 동행인원 선택 #}
+                    </div>
+
+                    {# s: 매장 방문 순서 #}
+                    <div class="modal_conBox con_last">
+                        <p class="con_tit">3. 매장 방문 순서</p>
+                        <div class="visit_order_table">
+                            <div class="order_wrap">
+                                <div class="heading">
+                                    <div class="cell">
+                                        <p>장소 유형</p>
+                                    </div>
+                                    <div class="cell mb_list">
+                                        <p>순번</p>
+                                    </div>
+                                    <div class="cell">
+                                        <p>방문 장소</p>
+                                    </div>
+                                    <div class="cell">
+                                        <p>방문 목적</p>
+                                    </div>
+                                    <div class="cell">
+                                        <p>방문 일자</p>
+                                    </div>
+                                </div>
+
+                                <div class="order_box" id="retails_list">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {# e: 매장 방문 순서 #}
+                </div>
+
+                <div class="modal_footer">
+                    <div class="modal_ft md_ft1">
+                        <span class="ft_text" id="error_text1" style="visibility: hidden;">
+                            모든 일정 유형을 선택 해주세요 :)
+                        </span>
+                        <button type="button" class="next_btn" >다음</button>
+                    </div>
+
+                    <div class="modal_ft md_ft2">
+                        <span class="ft_text" id="error_text2" style="visibility: hidden">
+                            모든 일정 유형을 선택 해주세요 :)
+                        </span>
+                        <button type="button" class="return_btn" >이전</button>
+                        <button type="button" class="save_btn" >저장</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <!-- e: modal -->
+
+        <!-- s: save_modal -->
+        <div class="save_modal">
+            <h1>매장 방문 리스트 생성</h1>
+            <p id="save_modal_body">이 매장 방문 리스트를 생성하시겠습니까?</p>
+            <div class="modal_footer" id="save_modal_footer">
+                <button type="button" class="returnBtn_1">취소</button>
+                <button type="button" class="produceBtn" onclick=SaveVisit()>생성</button>
+            </div>
+        </div>
+        <!-- e: save_modal -->
+
+        <!-- s: delete_modal -->
+        <div class="delete_modal">
+            <h1>매장 방문 리스트 삭제</h1>
+            <p id="delete_modal_body">이 매장 방문 리스트를 삭제하시겠습니까?</p>
+            <div class="modal_footer" id="delete_modal_footer">
+                <button type="button" class="returnBtn_2">취소</button>
+                <button type="button" class="deleteBtn" onclick=DeleteVisit()>삭제</button>
+            </div>
+        </div>
+
+        <!-- e: delete_modal -->
+
+        <div class="background"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // modal_open_close
+            $(".create_btn,.close_btn").click(function(){
+                $(".modal").toggle();
+                $(".modal_first, .md_ft1").show();
+                $(".modal_last, .md_ft2").hide();
+                sessionStorage.setItem('selectlist_retailstore', JSON.stringify([]))
+                sessionStorage.setItem('selectlist_market', JSON.stringify([]))
+                sessionStorage.setItem('selectlist_place', JSON.stringify([]))
+
+                sessionStorage.setItem('visitlist', JSON.stringify([]))
+                sessionStorage.setItem('tempselectlist', [])
+            });
+
+            // next_page
+            $(".next_btn").click(function () {
+                let select_retailstore = $("input[name='selected_retailstore']:checked")
+                let select_market = $("input[name='selected_market']:checked")
+                if(select_retailstore.length > 0 ||  select_market.length>0){
+                    let selectd_
+                    let selected_retailstorelist= []
+                    for(let i =0; i<select_retailstore.length; i++){
+                        selected_retailstorelist.push({'sfid':select_retailstore[i].attributes.value.value, 'name':select_retailstore[i].attributes.value_name.value})
+                    }
+                    sessionStorage.setItem('selectlist_retailstore', JSON.stringify(selected_retailstorelist))
+
+                    let select_marketlist= []
+                    for(let i =0; i<select_market.length; i++){
+                        select_marketlist.push({'sfid':select_market[i].attributes.value.value, 'name':select_market[i].attributes.value_name.value})
+                    }
+                    sessionStorage.setItem('selectlist_market', JSON.stringify(select_marketlist))
+
+                    $(".modal_first, .md_ft1").hide();
+                    $(".modal_last, .md_ft2").show();
+                    $("#error_text1").html('')
+                    $("#error_text1").css("visibility","None");
+                    setPlacelist()
+                    enableSelectBoxes()
+                }
+                else{
+                    $("#error_text1").html('1개 이상의 방문 장소를 선택 해주세요 :)')
+                    $("#error_text1").css("visibility","visible");
+                }
+
+            });
+
+            // save & reset
+            $(".close_btn").click(function () {
+                $(".modal_last, .modal, .md_ft2").hide();
+                $(".modal_first, .md_ft1").show();
+            });
+
+            // 계획 생성
+            $(".save_btn").click(function(){
+                let visitlist = JSON.parse(sessionStorage.getItem('visitlist'))
+                let visitType = $("input[name='VisitType_select']:checked").val()
+                let vehicle = $("input[name='Vehicle_select']:checked").val()
+                let business = $("input[name='Business_select']:checked").val()
+
+                if(visitType && vehicle && business){
+                    let retaillist = $("#retails_list").children()
+                    visitlist = []
+                    for(let i =0; i < retaillist.length ; i++){
+                        let retail_sfid = retaillist[i].attributes.value.value
+                        let objective = retaillist[i].querySelector('.selected_1').innerText
+                        let date = retaillist[i].querySelector('.selected_2').value
+                        if(objective.includes("방문목적 선택") || date == ''){
+                            retail_sfid = []
+                            visitlist = []
+                            break
+                        }
+                        else{
+                            if(retaillist[i].getElementsByTagName('div')[0].innerText == "매장" ) {
+                                visitlist.push({'sfid':retail_sfid,'objective':objective,'date':date,'type':'retailstore'})
+                            }
+                            else{
+                                visitlist.push({'sfid':retail_sfid,'objective':objective,'date':date,'type':'market'})
+                            }
+                        }
+                    }
+                    if(visitlist.length > 0){
+                        visitlist = JSON.stringify(visitlist)
+                        sessionStorage.setItem('visitlist', visitlist)
+                        sessionStorage.setItem('visitType', visitType)
+                        sessionStorage.setItem('vehicle', vehicle)
+                        sessionStorage.setItem('business', business)
+                        $(".modal").hide();
+                        $(".save_modal").show();
+                    }
+                    else{
+                        $("#error_text2").html('모든 일정을 기입 해주세요 :)')
+                        $("#error_text2").css("visibility","visible");
+                    }
+                }
+                else{
+                    $("#error_text2").html('모든 일정 유형을 선택 해주세요 :)')
+                    $("#error_text2").css("visibility","visible");
+
+                }
+            });
+
+            // return btn 클릭시 모달창 첫페이지 나오게
+            $(".return_btn").click(function () {
+                $(".modal_first, .md_ft1").show();
+                $(".modal_last, .md_ft2").hide();
+            });
+
+            // 계획 저장
+            $(".returnBtn_1").click(function(){
+                $(".modal").show();
+                $(".modal_last").show();
+                $(".modal_first").hide();
+                $(".save_modal").hide();
+            });
+
+            // 계획 제거
+            $(".delete_btn").click(function(){
+                let checked_list = $('input[name="visitlist_checkbox"]:checked')
+                if(checked_list.length){
+                    $(".delete_modal").show();
+                    $(".background").show();
+
+                }
+            });
+
+            // create modal background
+            $(".create_btn").click(function(){
+                $(".background").show();
+            });
+            $(".close_btn").click(function(){
+                $(".background").hide();
+            });
+
+            $(".returnBtn_2, .deleteBtn").click(function(){
+                $(".background").hide();
+            });
+
+            $(".returnBtn_2").click(function() {
+                $(".delete_modal").hide();
+            });
+
+            {#enableSelectBoxes();#}
+        });
+
+
+        // selectBox 외부영역 클릭시 닫기
+        $(document).mouseup(function (e){
+            if($(".select_team, .acc-list").has(e.target).length === 0){
+                $(".acc-list").slideUp('fast');
+                $(".arrow-btn1").removeClass("arrow-up arrow-down");
+            }
+            if($(".selected_1").has(e.target).length === 0){
+                $(".vs-list").slideUp('fast');
+                $(".arrow-btn2").removeClass("arrow-up2 arrow-down2");
+            }
+            if($(".selected_2").has(e.target).length === 0){
+                $(".date-list").slideUp('fast');
+                $(".arrow-btn3").removeClass("arrow-up3 arrow-down3");
+            }
+        });
+
+
+        function enableSelectBoxes()
+        {
+                $(".select_btn").off().on("click", function () {
+                    $(this).find(".arrow-btn1").toggleClass("arrow-up arrow-down");
+                    $(this).find(".arrow-btn2").toggleClass("arrow-up2 arrow-down2");
+                    $(this).find(".arrow-btn3").toggleClass("arrow-up3 arrow-down3");
+                    $(this).siblings(".listbox").slideToggle('fast');
+                    let htmls =''
+
+                    $('.select_box .acc-list').find("li").click(function(){
+                        if($($(this).parent()[0]).hasClass('acc-list')){
+                            let count = 0;
+                            let acc_html = '팀원 선택';
+                            let accompanylist = []
+
+                            $(this).parent().children().each( (index, element) => {
+                                if($(element).hasClass('active')){
+
+                                    if(count == 0){
+                                        acc_html = $(element).children('p')[0].innerHTML
+                                    }
+                                    accompanylist.push($(element).attr('value'))
+                                    count++;
+                                }
+                            })
+                            if(count>=2){
+                                acc_html += ' 외 '+String(count-1)+'명'
+                            }
+                            htmls = '<p>'+acc_html+'</p><span class="arrow-btn1 arrow-down"></span>'
+                            sessionStorage.setItem('accompanylist', accompanylist)
+
+                        }
+
+                        $(this).closest('.select_box').attr('value', $(this).attr('value'));
+                        $(this).parent().siblings('.select_btn').html(htmls);
+                        $(this).parent().siblings('.select_btn').attr('value',$(this).eq(0).attr('value'));
+                    });
+
+                    $('.select_box .vs-list, .date-list').find("li").click(function(){
+                        $(this).closest('.select_box').attr('value', $(this).attr('value'));
+                        $(this).parent().siblings('.select_btn').html($(this).html());
+                        $(this).parent().siblings('.select_btn').attr('value',$(this).eq(0).attr('value'));
+                    });
+
+                    $('.order_box').scroll(function(){
+                        $('.listbox').blur('fast');
+                    });
+                });
+        }
+
+        // 동행인원 다중선택
+        $(".acc-tab").click(function () {
+            $(this).toggleClass("active");
+        });
+
+        // 팀장확인 클릭시 그룹별 하이라이팅
+        {#$(document).ready(function() {#}
+        {#    $('.row_list input[type="checkbox"]').change(function() {#}
+        {#        var rowList = $(this).closest('.row_list');#}
+        {#        if ($(this).is(':checked')) {#}
+        {#            rowList.css('background-color', '#dfeeff');#}
+        {#        } else {#}
+        {#            rowList.css('background-color', '');#}
+        {#        }#}
+        {#    });#}
+        {#});#}
+
+        function dateChange(e){
+            if ($('#st_date').val() && $('#et_date').val()){
+                let datelist = getDatesStartToLast($('#st_date').val(),$('#et_date').val())
+                let html = '';
+                for(let i =0; i < datelist.length ; i++){
+                    html+= '<li value=' + datelist[i]+ '><p>' + datelist[i] + '</p><span class="arrow-btn2"></span></li>';
+                }
+                let palcedate = $(".date-list")
+                for(let i =0; i < palcedate.length ; i++){
+                   palcedate[i].innerHTML = html
+                }
+            }
+        }
+        function getDatesStartToLast(startDate, lastDate) {
+            var regex = RegExp(/^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/);
+            if(!(regex.test(startDate) && regex.test(lastDate))) return "Not Date Format";
+            var result = [];
+            var curDate = new Date(startDate);
+            while(curDate <= new Date(lastDate)) {
+                result.push(curDate.toISOString().split("T")[0]);
+                curDate.setDate(curDate.getDate() + 1);
+            }
+            return result;
+        }
+        function subtractvisit(e, sfid){
+
+            let visitlist = JSON.parse(sessionStorage.getItem('visitlist'))
+
+            visitlist = visitlist.filter(function(item) {
+                return item.sfid !== sfid
+            })
+
+            visitlist = JSON.stringify(visitlist)
+            sessionStorage.setItem('visitlist', visitlist)
+            let parent = e.parentNode
+            parent.remove()
+        }
+
+        function SaveVisit(){
+            $("#save_modal_body").html('일정을 생성 중입니다... 잠시만 기다려주세요!')
+            $("#save_modal_footer").css("display","None");
+
+            let visitlist = JSON.parse(sessionStorage.getItem('visitlist'))
+            let visitType = sessionStorage.getItem('visitType')
+            let vehicle = sessionStorage.getItem('vehicle')
+            let business = sessionStorage.getItem('business')
+            let accompany = sessionStorage.getItem('accompanylist')
+
+            if(visitType && vehicle){
+                if(visitlist.length > 0){
+                    let post_data = {
+                        'userid' : '{{ userid | safe}}',
+                        'visitlist' : visitlist,
+                        'visitType' : visitType,
+                        'vehicle' : vehicle,
+                        'accompany' : accompany,
+                        'business' : business
+                    }
+                     $.ajax({
+                        type:'POST',
+                        url: "{% url 'api:visitRecordHandler_v2' %}",
+                        data:JSON.stringify(post_data),
+                        success: function(response){
+                            $("#save_modal_body").html('일정이 성공적으로 생성 되었습니다! <br> 잠시만 기다려주세요!')
+                            $("#save_modal_footer").css("display","None");
+                            setTimeout(() => {
+                                history.go(0);
+                            }, 3000);
+                        },
+                        error: function(response){
+                            $("#save_modal_body").html('새로 고침 후 재시도 해주세요! <br><br> 잠시만 기다려주세요!')
+                            $("#save_modal_footer").css("display","None");
+                        }
+                     })
+                }
+                else{
+                }
+            }
+            else{
+            }
+        }
+
+        function DeleteVisit(){
+            $("#delete_modal_body").html('삭제 중입니다... 잠시만 기다려주세요!')
+            $("#delete_modal_footer").css("display","None");
+            let checked_list = $('input[name="visitlist_checkbox"]:checked')
+
+            let deleted_list = []
+            for(let i = 0; i< checked_list.length ; i++){
+                deleted_list.push(checked_list[i].value)
+            }
+            let post_data = {
+                'deletelist' : deleted_list,
+            }
+             $.ajax({
+                type:'DELETE',
+                url: "{% url 'api:visitRecordHandler_v2' %}",
+                data:JSON.stringify(post_data),
+                success: function(response){
+                    $("#delete_modal_body").html('일정이 성공적으로 삭제 되었습니다! <br><br> 잠시만 기다려주세요!')
+                    $("#delete_modal_footer").css("display","None");
+                    setTimeout(() => {
+                        history.go(0);
+                    }, 3000);
+                    {#alert('일정이 성공적으로 생성 되었습니다!')#}
+                },
+                error: function(response){
+                    $("#delete_modal_body").html('새로 고침 후 재시도 해주세요! <br><br> 잠시만 기다려주세요!')
+                    $("#delete_modal_footer").css("display","None");
+                    setTimeout(() => {
+                        history.go(0);
+                    }, 2000);
+                }
+             })
+        }
+        function setPlacelist(){
+            let html = '';
+            let seq = 1;
+            let selectlist_retailstore = JSON.parse(sessionStorage.getItem('selectlist_retailstore'))
+            for(let i =0; i < selectlist_retailstore.length ; i++){
+                html+= '<div class="row visit_row" value='+selectlist_retailstore[i].sfid+'>'+
+                '<div class="cell"><p>매장</p></div>' +
+                '<div class="cell mb_list"><p>'+(seq).toString()+'</p></div>' +
+                '<div class="cell"><p>'+selectlist_retailstore[i].name+'</p></div>' +
+                '<div class="cell select_box">' +
+                 '<button type="button" class="select_btn selected_1">' +
+                        '<p class="select-name2">방문목적 선택</p>' +
+                       ' <span class="arrow-btn2"></span>' +
+                   ' </button>' +
+                    '<ul class="listbox vs-list">'+
+                        '<li><p>매장요청</p><span class="arrow-btn2"></span></li><li><p>이슈논의</p><span class="arrow-btn2"></span></li><li><p>정기방문</p><span class="arrow-btn2"></span></li><li><p>시장조사</p><span class="arrow-btn2"></span></li><li><p>오픈상담</p><span class="arrow-btn2"></span></li>'+
+                    '</ul>'+
+                '</div>'+
+                '<div class="cell select_box">'+
+                    '<button type="button" class="select_btn selected_2">'+
+                        '<p class="select-name3">방문일자 선택</p>'+
+                        '<span class="arrow-btn3"></span>'+
+                    '</button>'+
+                    '<ul class="listbox date-list">'+
+                    '</ul>'+
+                '</div>'+
+            '</div>'
+                seq ++;
+            }
+            let selectlist_market = JSON.parse(sessionStorage.getItem('selectlist_market'))
+            for(let i =0; i < selectlist_market.length ; i++){
+                html+= '<div class="row" value='+selectlist_market[i].sfid+'>'+
+                '<div class="cell"><p>상담/시장조사</p></div>' +
+                '<div class="cell mb_list"><p>'+(seq).toString()+'</p></div>' +
+                '<div class="cell"><p>'+selectlist_market[i].name+'</p></div>' +
+                '<div class="cell select_box">' +
+                 '<button type="button" class="select_btn selected_1">' +
+                        '<p class="select-name2">방문목적 선택</p>' +
+                       ' <span class="arrow-btn2"></span>' +
+                   ' </button>' +
+                    '<ul class="listbox vs-list">'+
+                        '<li>시장조사</li><li>오픈상담</li>'+
+                    '</ul>'+
+                '</div>'+
+                '<div class="cell select_box">'+
+                    '<button type="button" class="select_btn selected_2">'+
+                        '<p class="select-name3">방문일자 선택</p>'+
+                        '<span class="arrow-btn3"></span>'+
+                    '</button>'+
+                    '<ul class="listbox date-list">'+
+                    '</ul>'+
+                '</div>'+
+            '</div>'
+                seq ++;
+            }
+
+            $("#retails_list").html(html)
+        }
+
+        function addRetailstore(event){
+            let targetid = event.value
+            let tempselectlist = sessionStorage.getItem('tempselectlist')
+            if(tempselectlist){
+                tempselectlist = tempselectlist.split(',')
+                var index = tempselectlist.indexOf(targetid);
+                if (index !== -1) {
+                      tempselectlist.splice(index, 1);
+                }else
+                {
+                    tempselectlist.push(targetid)
+                }
+            }
+            else{
+                tempselectlist = [targetid]
+            }
+            sessionStorage.setItem('tempselectlist', tempselectlist)
+
+        }
+
+        function searchRetailstore() {
+            let seletedlist = sessionStorage.getItem('tempselectlist')
+
+            let RName = $('#SearchRetail').val().toLowerCase()
+            let retail_list = {{ retail_list | safe}}
+
+            if(seletedlist) {
+                seletedlist = seletedlist.split(',')
+            }else{
+                seletedlist = []
+            }
+            let selectedSearchResult = retail_list.filter((picklistOption) =>
+                picklistOption.name.toLowerCase().includes(RName)
+            );
+
+            let html = ''
+            for (let i = 0; i <= selectedSearchResult.length-1; i++) {
+                html +=
+                    '<div class="row">'
+                if(seletedlist.includes(selectedSearchResult[i].sfid)){
+                    html +=
+                    '<div class="cell"><input type="checkbox" name="selected_retailstore" value=' + selectedSearchResult[i].sfid + ' value_name=' + selectedSearchResult[i].name + ' oninput=addRetailstore(this) checked></div>'
+                }
+                else{
+                    html +=
+                    '<div class="cell"><input type="checkbox" name="selected_retailstore" value=' + selectedSearchResult[i].sfid + ' value_name=' + selectedSearchResult[i].name + ' oninput=addRetailstore(this)></div>'
+                }
+
+                html +=
+                    '<div class="cell"><p>' + selectedSearchResult[i].shop_cd_c + '</p></div>' +
+                    '<div class="cell"><p>' + selectedSearchResult[i].storediv__name + '</p></div>' +
+                    '<div class="cell"><p>' + selectedSearchResult[i].name + '</p></div>' +
+                    '<div class="cell"><p>' + selectedSearchResult[i].addr_c + '</p></div>' +
+                    '<div class="cell"><p>' + selectedSearchResult[i].lastvisit + '</p></div>' +
+                    '<div class="cell"><p>' + selectedSearchResult[i].visitcount + '</p></div>' +
+                    '</div>'
+            }
+            $("#retail_list_div").html(html)
+        }
+        function CheckValue_Change(event){
+
+            console.log($(event).prop('checked'))
+            let d_body = {
+                'sfid' : $(event).prop('value'),
+                'activate' : $(event).prop('checked')
+            }
+
+            $.ajax({
+                type:'PATCH',
+                url: "{% url 'api:visitRecordHandler_v2' %}",
+                data:JSON.stringify(d_body),
+                success: function(response){
+                   console.log(response)
+                },
+                error: function(response){
+                    console.log(response)
+
+                }
+             })
+
+        }
+        function postmessage(data){
+            window.parent.postMessage(data, "*");
+        }
+
+    </script>
+</body>
+</html>

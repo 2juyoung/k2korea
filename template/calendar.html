@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+      <meta charset='utf-8' />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+      <link rel="stylesheet" type="text/css" href="/static/css/reset.css" />
+      <link rel="stylesheet" type="text/css" href="/static/css/calendar.css" />
+      <title>K2 Korea Maps</title>
+  </head>
+  <body>
+    <div class="wrap" style="display:flex">
+        <div id='calendar' style="width:100%;"></div>
+        <div class="sidebar" style="width:300px;" >
+            <div class="side_con">
+                <div id='comparebtn' class="con_tit" style='font-size: 15px' onclick="clickevent()"> 작년 일정  </div>
+            </div>
+            <div class="side_con">
+                <div class="con_tit"> Contents </div>
+                <div class="side_box">
+                    <div id='date' style="text-align: center;"></div>
+                    <textarea id = 'contents' style="box-sizing: border-box; height : 400px; width: 100%;resize: none;" placeholder="" readonly></textarea>
+                </div>
+            </div>
+
+            <div class="side_con">
+                <div class="con_tit"> Comment </div>
+                <div class="side_box">
+                    <div id='date' style="text-align: center;"></div>
+                    <textarea id = 'comment' style="height : 400px; width: 100%;resize: none;" placeholder="날짜 선택 또는 Comment를 작성 해 주세요"></textarea>
+                    <button id="save_button" onclick="savecomment()">저장 하기</button>
+                </div>
+            </div>
+
+          </div>
+      </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            dataset = '';
+            var url = new URL(window.location.href);
+            urlParams = url.searchParams;
+            var comparebtn = $('#comparebtn')
+
+            if(urlParams.get('PASTVIEW') == '1'){
+                comparebtn.html('현재 일정')
+            }
+            else{
+                comparebtn.html('작년 일정')
+            }
+
+              var userid = '{{userid|safe}}'
+              document.getElementById('comment').setAttribute('data-userid', userid )
+
+            var calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth', events: {{events|safe}},
+              initialDate : '{{initialdate |safe}}',
+              eventColor: '#236590',
+              eventBorderColor: '#236590',
+              dayMaxEvents: 4,
+              eventOrder: '-sortIdx',
+             datesSet:function(event) {
+                eventChange(event)
+             },
+              eventClick: function(info) {
+                  console.log(info.event.id)
+                var findOne = {{events|safe}}.find(x => x.id == info.event.id);
+                console.log('ssss')
+                console.log(findOne)
+                {#document.getElementById('contents').value = findOne.content != undefined ? findOne.content : '' ;#}
+                {#document.getElementById('comment').value = findOne.comment != undefined ? findOne.comment : '';#}
+                $.ajax({
+                    type:'GET',
+                    data: jQuery.param({ nttid: info.event.id, userid : userid}) ,
+                    url:'{% url 'api:calendar_comment_api' %}',
+                    dataType:"json",
+                    success: function(data){
+                        console.log(data)
+                        if(data.contents){
+                            document.getElementById('contents').value = data.contents;
+                        }
+                        if(data.comment) {
+                            document.getElementById('comment').value = data.comment[0].contents;
+                            document.getElementById('comment').setAttribute('data-nttid', data.comment[0].ntt_id)
+                        }
+                        else{
+                            document.getElementById('comment').value = '';
+                            document.getElementById('comment').setAttribute('data-nttid', info.event.id)
+                        }
+                    },
+                    error:function(){
+                        console.log('ss')
+                        document.getElementById('comment').value = '';
+                        document.getElementById('comment').setAttribute('data-nttid', info.event.id)
+                        console.log("통신에러");
+                    }
+                })
+
+              }
+
+            });
+
+            calendar.render();
+            function eventChange(event){
+                let compcode = urlParams.get('COMPCODE')
+                let shopcode = urlParams.get('SHOPCODE')
+                let midDate = new Date((event.start.getTime() + event.end.getTime()) / 2)
+                let month = midDate.getMonth() + 1
+                let year = midDate.getFullYear()
+                var source  = calendar.getEventSources()[0]
+                console.log(dataset)
+                $.ajax({
+                    type:'GET',
+                    url:'{% url 'api:calendar_event_api' %}' + '?SHOPCODE='+shopcode+'&COMPCODE=' + compcode+'&DATE=' + String(year)+String(month),
+                    dataType:"json",
+                    success: function(data){
+                        source.remove()
+                        calendar.addEventSource(data);
+                        calendar.refetchEvents();
+                        this.dataset = data;
+
+                    },
+                    error:function(){console.log("통신에러");}
+                })
+            }
+        });
+        function clickevent(){
+            var comparebtn = $('#comparebtn')
+            let compcode = urlParams.get('COMPCODE')
+            let shopcode = urlParams.get('SHOPCODE')
+
+            let cMonth = calendar.getDate().getMonth()+1
+            let cYear = calendar.getDate().getFullYear()
+            console.log(cMonth, cYear)
+            var source  = calendar.getEventSources()[0]
+             if(comparebtn.html() == '현재 일정'){
+                 comparebtn.html('작년 일정')
+                 cYear +=1;
+            }
+            else{
+                 comparebtn.html('현재 일정')
+                 cYear -=1;
+            }
+            console.log('sss')
+            let nweDate
+            if (cMonth > 9){
+                nweDate = String(cYear) + '-'+String(cMonth)+'-01'
+            }
+            else{
+                nweDate = String(cYear) + '-0'+String(cMonth)+'-01'
+            }
+
+            calendar.gotoDate(nweDate)
+            {#$.ajax({#}
+            {#    type:'GET',#}
+            {#    url:'{% url 'api:calendar_event_api' %}' + '?SHOPCODE='+shopcode+'&COMPCODE=' + compcode+'&DATE=' + String(cYear)+String(cMonth),#}
+            {#    dataType:"json",#}
+            {#    success: function(data){#}
+            {#        source.remove()#}
+            {#        calendar.addEventSource(data);#}
+            {#        calendar.refetchEvents()#}
+            {#        calendar.gotoDate('2024-04-05')#}
+            {#    },#}
+            {#    error:function(){console.log("통신에러");}#}
+            {#})#}
+        }
+</script>
+<script>
+
+
+        function savecomment() {
+          var save_button = $("#save_button").text("저장중...")
+          document.querySelector('#save_button').disabled = true;
+          $.ajax({
+                    type:'POST',
+                    data: {
+                        comment: document.getElementById('comment').value,
+                        userid : document.getElementById('comment').dataset['userid'],
+                        nttid:document.getElementById('comment').dataset['nttid']
+                    } ,
+                    url:'{% url 'api:calendar_comment_api' %}',
+                    dataType:"json",
+                    success: function(data){
+                        save_button.text("저장하기")
+                        document.querySelector('#save_button').disabled = false;
+
+                    },
+                    error:function(){
+                        console.log("통신에러");
+                    }
+                })
+
+        }
+
+</script>
+  </body>
+</html>
+
+
+
